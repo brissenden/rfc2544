@@ -99,7 +99,8 @@ int main(int argc, char *argv[]){
         // Return rcv_bytes to client to check
         send_buf[0] = CMD_FINISH_ACK;
         send_buf[1] = rcv_bytes;
-        sendto(sock, send_buf, CMD_SIZE, 0, (struct sockaddr*) &from,fromlen);
+        send_buf[2] = rcv_frames;
+        sendto(sock, send_buf, CMD_SIZE+2, 0, (struct sockaddr*) &from,fromlen);
 
         fprintf(stdout, "%d, %lu, %lu \n", bytes, rcv_bytes, rcv_frames);
 

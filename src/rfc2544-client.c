@@ -23,8 +23,8 @@ void error(char *msg){
 }
 
 int main(int argc, char *argv[]) {
-	int i, y, sock, length, n, data[2], status, bytes, it;
-	long send_frames, rcv_bytes, send_bytes;
+	int i, y, sock, length, n, data[4], status, bytes, it;
+	long send_frames, rcv_frames, rcv_bytes, send_bytes;
 	struct sockaddr_in server;
 	struct hostent *hp;
 	float rcv_buf[1024], send_buf[1024];
@@ -65,14 +65,16 @@ int main(int argc, char *argv[]) {
 	bytes = atoi(argv[3]);
 	bytes -= HEADERS;
 	
-  printf("###### Network packet will have %d data bytes \n", bytes);
+  if (DEBUG) {
+    printf("###### Network packet will have %d data bytes \n", bytes);
+  }
 
 	bzero(rcv_buf,  1024);
 	bzero(send_buf, 1024);
 	
 	status = SETUP;
 	udelay = ONE_SECOND;
-	y = 2.0; // divider
+	y = 16.0; // divider
 
 	while(!ok) {
 		if (status == SETUP) {
@@ -133,15 +135,32 @@ int main(int argc, char *argv[]) {
       // Fetch received bytes from server
     	data[0] = rcv_buf[0];
     	data[1] = rcv_buf[1];
+      data[2] = rcv_buf[2];
     	if (data[0] == CMD_FINISH_ACK) {
-				status    = SETUP;
-				rcv_bytes = data[1];
+				status      = SETUP;
+				rcv_bytes   = data[1];
+        rcv_frames  = data[2];
 			}
 
+      // Throughput: measures the maximum rate at which none of the offered frames are dropped by the device/system under test (DUT/SUT). This measurement translates into the available bandwidth of the Ethernet virtual connection.
+      
       float Bbs = (send_bytes + (send_frames * HEADERS));
       float Kbs = Bbs/1024;
       float Mps = Kbs/1024;
-			fprintf(stdout,"%f Mb/s | %f KB/s | %f B/s | PPS: %lu \n", Mps, Kbs, Bbs, send_frames);
+      
+      float Throughput = Mps;
+      
+      // Back-to-back or burstability: measures the longest burst of frames at maximum throughput or minimum legal separation between frames that the device or network under test will handle without any loss of frames. This measurement is a good indication of the buffering capacity of a DUT.
+      
+      long int Backtoback = send_frames;
+      
+      // Frame loss: defines the percentage of frames that should have been forwarded by a network device under steady state (constant) loads that were not forwarded due to lack of resources. This measurement can be used for reporting the performance of a network device in an overloaded state, as it can be a useful indication of how a device would perform under pathological network conditions such as broadcast storms.
+      
+      float Framelossrate = ( ( send_frames - rcv_frames ) * 100 ) / send_frames;
+      
+      
+      
+			fprintf(stdout, "Throughput: %f Mb/s | Back-to-back: %lu | Framelossrate: %f \n", Throughput, Backtoback, Framelossrate);
 
 			if (status == SETUP) {
 				if (rcv_bytes == send_bytes) {
@@ -157,8 +176,7 @@ int main(int argc, char *argv[]) {
 					}
 				} else {
           // Set more delay because of lost packets
-					udelay = udelay * y;
-					y = y / 2; // set smaller divider
+					udelay = udelay * y; // reduced rate
           if (DEBUG) {
             printf("### LOW ### Set higher delay because of packets lost. Delay: %f Y: %d\n", udelay, y);
           }
