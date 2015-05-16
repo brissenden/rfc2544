@@ -101,6 +101,8 @@ int main(int argc, char *argv[]){
         send_buf[1] = rcv_bytes;
         sendto(sock, send_buf, CMD_SIZE, 0, (struct sockaddr*) &from,fromlen);
 
+        fprintf(stdout, "%d, %lu, %lu \n", bytes, rcv_bytes, rcv_frames);
+
         clear_bench();
         usleep(DELAY);
       } else {
