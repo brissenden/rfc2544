@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
 			send_frames = 0;
 			it = ONE_SECOND / udelay; // how many packet to send
 			send_bytes = 0;
-			
+      
       // Sending data to server
 			for (i = 0; i < it; ++i) {
 				send_buf[0] = CMD_DATA;
@@ -148,19 +148,9 @@ int main(int argc, char *argv[]) {
       float Kbs = Bbs/1024;
       float Mps = Kbs/1024;
       
-      float Throughput = Mps;
+      float Throughput = Mps;      
       
-      // Back-to-back or burstability: measures the longest burst of frames at maximum throughput or minimum legal separation between frames that the device or network under test will handle without any loss of frames. This measurement is a good indication of the buffering capacity of a DUT.
-      
-      long int Backtoback = send_frames;
-      
-      // Frame loss: defines the percentage of frames that should have been forwarded by a network device under steady state (constant) loads that were not forwarded due to lack of resources. This measurement can be used for reporting the performance of a network device in an overloaded state, as it can be a useful indication of how a device would perform under pathological network conditions such as broadcast storms.
-      
-      float Framelossrate = ( ( send_frames - rcv_frames ) * 100 ) / send_frames;
-      
-      
-      
-			fprintf(stdout, "Throughput: %f Mb/s | Back-to-back: %lu | Framelossrate: %f \n", Throughput, Backtoback, Framelossrate);
+			fprintf(stdout, "Throughput: %f Mb/s | PPS: %lu \n", Throughput, send_frames);
 
 			if (status == SETUP) {
 				if (rcv_bytes == send_bytes) {
