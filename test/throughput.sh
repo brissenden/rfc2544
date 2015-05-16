@@ -6,6 +6,10 @@ PORT=8000
 DIR=$(dirname $0)
 NOW=$(date +'%Y%m%d%H%M%S')
 
+if [ ! -d "log" ];then
+	mkdir log
+fi
+
 if [ ! -d "log/throughput" ];then
 	mkdir log/throughput
 fi
