@@ -20,7 +20,7 @@
 #define SEND 0x4
 #define FINISH 0x8
 
-#define DEBUG 1
+#define DEBUG 0
 
 #endif
 

@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 	
 	status = SETUP;
 	udelay = ONE_SECOND;
-	y = 16.0; // divider
+	y = 2.0; // divider
 
 	while(!ok) {
 		if (status == SETUP) {
@@ -138,10 +138,9 @@ int main(int argc, char *argv[]) {
 				rcv_bytes = data[1];
 			}
 
-			if (DEBUG) {
-        float Mps = (send_bytes + (send_frames * HEADERS))/1024/1024;
-				fprintf(stdout,"Mb/s: %f pps: %lu\n", Mps, send_frames);
-			};
+      float Kbs = (send_bytes + (send_frames * HEADERS))/1024;
+      float Mps = Kbs/1024;
+			fprintf(stdout,"Mb/s: %f KB/s: %f pps: %lu\n", Mps, Kbs, send_frames);
 
 			if (status == SETUP) {
 				if (rcv_bytes == send_bytes) {
@@ -152,19 +151,13 @@ int main(int argc, char *argv[]) {
               printf("### UP ### Set smaller dalay and more packet to send. Delay: %f Y: %d\n", udelay, y);
             }
 					} else {
-            // Generate report and finish
+            // Finish
 						ok = 1;
-						send_bytes += (send_frames * HEADERS);
-            
-            float Mps = (bytes+HEADERS)/1024/1024;
-						printf("%f,%lu,%lu,%f\n", Mps, send_bytes, send_frames, udelay);
-						fflush(stdout);
 					}
 				} else {
           // Set more delay because of lost packets
 					udelay = udelay * y;
 					y = y / 2; // set smaller divider
-          
           if (DEBUG) {
             printf("### LOW ### Set higher delay because of packets lost. Delay: %f Y: %d\n", udelay, y);
           }
