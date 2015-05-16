@@ -167,6 +167,7 @@ int main(int argc, char *argv[]) {
 				} else {
           // Set more delay because of lost packets
 					udelay = udelay * y; // reduced rate
+          y = y / 2;
           if (DEBUG) {
             printf("### LOW ### Set higher delay because of packets lost. Delay: %f Y: %d\n", udelay, y);
           }
