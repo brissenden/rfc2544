@@ -138,9 +138,10 @@ int main(int argc, char *argv[]) {
 				rcv_bytes = data[1];
 			}
 
-      float Kbs = (send_bytes + (send_frames * HEADERS))/1024;
+      float Bbs = (send_bytes + (send_frames * HEADERS));
+      float Kbs = Bbs/1024;
       float Mps = Kbs/1024;
-			fprintf(stdout,"Mb/s: %f KB/s: %f pps: %lu\n", Mps, Kbs, send_frames);
+			fprintf(stdout,"%f Mb/s | %f KB/s | %f B/s | PPS: %lu \n", Mps, Kbs, Bbs, send_frames);
 
 			if (status == SETUP) {
 				if (rcv_bytes == send_bytes) {
