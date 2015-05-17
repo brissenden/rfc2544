@@ -30,7 +30,6 @@ module Throughput
     private
     
     def data_handler
-      puts "Data received"
     	@rcv_frames += 1
     end
     
