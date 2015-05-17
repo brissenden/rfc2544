@@ -21,62 +21,66 @@ module Throughput
       @send_bytes  = 0
       @stats       = []
       
-      @multiplier  = 16
-      @udelay      = 0.01
       @running     = true
     end
     
-    def call(frame_size)
+    def call(max_frame_rate, frame_size)
+      @fps  = max_frame_rate
+      @last_not_passed_fps = max_frame_rate
+      @test_time = 1.0
+      
       @bytes = frame_size
       @bytes -= HEADERS
       
       while @running
         send_and_wait_to_ack build_request('CMD_SETUP_SYN') do
           send_data_packets
+          
           send_and_wait_to_ack build_request('CMD_FINISH_SYN') do |response|
             if response.data.to_i == @send_frames
-              mbs = (@send_bytes.to_f * 8) / 1024 / 1024
-              
-              p mbs
-              
-              @stats << { throughput: mbs, frame_size: frame_size}
-              
-              if @multiplier > 1
-                increment_rate
-              else
-                @running = false
-              end
+              @stats << { fps: @fps }
+
+              increment_rate
             else
+              @last_not_passed_fps = @fps
               decrement_rate
             end
             reset
           end
         end
       end
-      @stats.max{ |e| e[:throughput] }
+      @stats.max{ |e| e[:fps] }
     end
     
     def send_data_packets
-      rate = 1.0/@udelay
-      data = (@bytes - CMD_HEADER).times.map{ '1' }.join()
+      udelay = @test_time/@fps
       
-      rate.to_i.times.each do |i|
+      data = (@bytes - CMD_HEADER).times.map{ '1' }.join()
+      @fps.to_i.times.each do |i|
         send_request build_request('CMD_DATA', data)
         @send_frames += 1
         @send_bytes  += data.length
-        sleep @udelay
+        sleep udelay
       end
     rescue FloatDomainError
       puts "FloatDomainError!"
     end
     
     def increment_rate
-      @udelay = @udelay / @multiplier
+      add = (@fps - @last_not_passed_fps).abs / 2
+      @fps += add
+      
+      if @fps < 2 || add == 0
+        @running = false
+      end
     end
     
     def decrement_rate
-      @udelay = @udelay * @multiplier
-      @multiplier = @multiplier / 2
+      @fps = @fps / 2
+      
+      unless @fps > 1
+        @running = false
+      end
     end
     
     def reset
@@ -99,8 +103,8 @@ module Throughput
           end
         end
       rescue Timeout::Error
-        puts "Timed out!"
-        decrement_rate
+        # puts "Timed out!"
+        sleep 1
       end
     end
     
