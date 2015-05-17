@@ -12,7 +12,7 @@ module Throughput
     
     attr_accessor :host, :port, :socket
     
-    def initialize(host, port)
+    def initialize(host, port, max_frame_rate)
       @host   = host
       @port   = port
       @socket = UDPSocket.new
@@ -22,12 +22,12 @@ module Throughput
       @stats       = []
       
       @running     = true
+      
+      @fps                 = max_frame_rate
+      @last_not_passed_fps = max_frame_rate
     end
     
-    def call(max_frame_rate, frame_size)
-      @fps = max_frame_rate
-      @last_not_passed_fps = max_frame_rate
-      
+    def call(frame_size)      
       @bytes = frame_size
       @bytes -= HEADERS
       
@@ -103,7 +103,7 @@ module Throughput
         end
       rescue Timeout::Error
         # puts "Timed out!"
-        sleep 1
+        decrement_rate
       end
     end
     

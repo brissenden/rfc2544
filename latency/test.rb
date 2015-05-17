@@ -13,11 +13,18 @@
 
 require_relative 'udp_client'
 
+# host = 'kozel.hung.p2.tiktalik.io'
 host = 'localhost'
+
+test_time   = 120
+frame_rate  = 5  # frames per sec
 frame_sizes = [64, 128, 256, 512, 1024, 1280, 1518]
 
-latency = ->(frame_rate, frame_size) {
-  Latency::UdpClient.new(host, 9999).(frame_rate, frame_size)
+latency = ->(frame_size) {
+  Latency::UdpClient.new(host, 9999, test_time, frame_rate).(frame_size)
 }
 
-latency.(5, 64)
+frame_sizes.each do |frame_size|
+  result = latency.(frame_size)
+  puts "Frame size: #{frame_size} Latency: #{result}\n"
+end

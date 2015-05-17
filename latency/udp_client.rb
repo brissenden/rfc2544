@@ -12,16 +12,16 @@ module Latency
     
     attr_accessor :host, :port, :socket
     
-    def initialize(host, port)
+    def initialize(host, port, test_time, frame_rate)
       @host   = host
       @port   = port
       @socket = UDPSocket.new
+      
+      @test_time = test_time
+      @fps       = frame_rate
     end
     
-    def call(frame_rate, frame_size)
-      @fps       = frame_rate
-      @test_time = 30
-      
+    def call(frame_size)
       @bytes = frame_size
       @bytes -= HEADERS
       
@@ -29,18 +29,18 @@ module Latency
         send_data_packets
         
         send_and_wait_to_ack build_request('CMD_LATENCY_SYN') do |response|
-          latency = response.data.to_i - @timestamp
-          puts "Latency: #{latency}"
+          @latency = @timestamp - response.data.to_i
         end
       end
+      @latency
     end
     
     def send_data_packets
       udelay = 1.0/@fps
       data   = (@bytes - CMD_HEADER).times.map{ '1' }.join()
       
-      @fps.to_i.times.each do |sec|
-        if sec == @fps.to_i/2
+      @test_time.to_i.times.each do |sec|
+        if sec == (@test_time.to_i/2)-1
           @timestamp = Time.now.to_i
           send_request build_request('CMD_LATENCY', @timestamp.to_s)
         end
