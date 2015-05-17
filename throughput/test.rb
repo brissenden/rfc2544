@@ -21,5 +21,5 @@ throughput = ->(max_frame_rate, frame_size) {
 
 frame_sizes.each do |frame_size|
   result = throughput.(100, frame_size)
-  puts "FPS: #{result[:fps]}\nFrame size: #{frame_size}\n"
+  puts "FPS: #{result[:fps]}\nFrame size: #{frame_size}\n\n"
 end
