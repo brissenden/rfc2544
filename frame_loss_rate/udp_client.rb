@@ -2,7 +2,7 @@ require 'timeout'
 require 'socket'
 require_relative '../core/protocol'
 
-module Throughput
+module FrameLossRate
   class UdpClient
     IP_HEADER     = 20
     UDP_HEADER    = 8
@@ -18,13 +18,12 @@ module Throughput
       @socket = UDPSocket.new
       
       @send_frames = 0
-      @send_bytes  = 0
       @stats       = []
       
       @running     = true
       
-      @fps                 = max_frame_rate
-      @last_not_passed_fps = max_frame_rate
+      @fps = max_frame_rate
+      @prev_trial_succeeded = false
     end
     
     def call(frame_size)      
@@ -36,50 +35,43 @@ module Throughput
           send_data_packets
           
           send_and_wait_to_ack build_request('CMD_FINISH_SYN') do |response|
+            @frame_loss_rate = ( ( @send_frames - response.data.to_i ) * 100 ) / @send_frames
+            
+            @stats << { frame_loss_rate: @frame_loss_rate, fps: @fps }
+            
             if response.data.to_i == @send_frames
-              @stats << { fps: @fps }
-
-              increment_rate
+              if @prev_trial_succeeded
+                @running = false
+              end
+              
+              @prev_trial_succeeded = true
             else
-              @last_not_passed_fps = @fps
+              @prev_trial_succeeded = false
               decrement_rate
             end
+            
             reset
           end
         end
       end
-      @stats.max{ |e| e[:fps] }
+      @stats
     end
     
     def send_data_packets
-      udelay = 1.0/@fps
+      udelay  = 1.0/@fps
+      data    = (@bytes - CMD_HEADER).times.map{ '1' }.join
       
-      data = (@bytes - CMD_HEADER).times.map{ '1' }.join()
       @fps.to_i.times.each do |i|
         send_request build_request('CMD_DATA', data)
         @send_frames += 1
-        @send_bytes  += data.length
         sleep udelay
       end
     rescue FloatDomainError
       puts "FloatDomainError!"
     end
     
-    def increment_rate
-      add = (@fps - @last_not_passed_fps).abs / 2
-      @fps += add
-      
-      if @fps < 2 || add == 0
-        @running = false
-      end
-    end
-    
     def decrement_rate
-      @fps = @fps / 2
-      
-      unless @fps > 1
-        @running = false
-      end
+      @fps = @fps * 0.9
     end
     
     def reset
@@ -101,9 +93,8 @@ module Throughput
             yield(response)
           end
         end
-      rescue Timeout::Error
+      rescue 
         puts "Timed out!"
-        decrement_rate
       end
     end
     
