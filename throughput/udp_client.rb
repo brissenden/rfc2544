@@ -1,6 +1,6 @@
 require 'timeout'
 require 'socket'
-require_relative 'protocol'
+require_relative '../core/protocol'
 
 module Throughput
   class UdpClient
@@ -25,9 +25,8 @@ module Throughput
     end
     
     def call(max_frame_rate, frame_size)
-      @fps  = max_frame_rate
+      @fps = max_frame_rate
       @last_not_passed_fps = max_frame_rate
-      @test_time = 1.0
       
       @bytes = frame_size
       @bytes -= HEADERS
@@ -53,7 +52,7 @@ module Throughput
     end
     
     def send_data_packets
-      udelay = @test_time/@fps
+      udelay = 1.0/@fps
       
       data = (@bytes - CMD_HEADER).times.map{ '1' }.join()
       @fps.to_i.times.each do |i|
@@ -95,7 +94,7 @@ module Throughput
         timeout(3) do
           message, client_address = socket.recvfrom(1024)
       
-          response = CustomProtocol.new
+          response = ::Core::CustomProtocol.new
           response.read(message)      
           expected_command = request.command.gsub('SYN', 'ACK')
           if response.command == expected_command
@@ -109,7 +108,7 @@ module Throughput
     end
     
     def build_request(command, data = nil)
-      CustomProtocol.new.tap do |request|
+      ::Core::CustomProtocol.new.tap do |request|
         request.command = command
         request.data    = data
       end

@@ -1,6 +1,6 @@
 require 'bindata'
 
-module Throughput
+module Core
   class CustomProtocol < BinData::Record
     endian  :big
     stringz :command
