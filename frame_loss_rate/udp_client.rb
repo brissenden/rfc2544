@@ -12,7 +12,7 @@ module FrameLossRate
     
     attr_accessor :host, :port, :socket
     
-    def initialize(host, port, max_frame_rate)
+    def initialize(host, port)
       @host   = host
       @port   = port
       @socket = UDPSocket.new
@@ -21,12 +21,12 @@ module FrameLossRate
       @stats       = []
       
       @running     = true
-      
-      @fps = max_frame_rate
-      @prev_trial_succeeded = false
     end
     
-    def call(frame_size)      
+    def call(max_frame_rate, frame_size)    
+      @fps = max_frame_rate
+      @prev_trial_succeeded = false
+        
       @bytes = frame_size
       @bytes -= HEADERS
       

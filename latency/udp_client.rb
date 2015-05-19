@@ -12,16 +12,17 @@ module Latency
     
     attr_accessor :host, :port, :socket
     
-    def initialize(host, port, test_time, frame_rate)
+    def initialize(host, port, test_time)
       @host   = host
       @port   = port
       @socket = UDPSocket.new
       
       @test_time = test_time
-      @fps       = frame_rate
     end
     
-    def call(frame_size)
+    def call(frame_rate, frame_size)
+      @fps   = frame_rate
+            
       @bytes = frame_size
       @bytes -= HEADERS
       

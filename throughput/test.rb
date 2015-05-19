@@ -10,18 +10,25 @@
 
 require_relative 'udp_client'
 
-# host = 'kozel.hung.p2.tiktalik.io'
-# host = '85.14.98.130'
-host = 'localhost'
+module Throughput
+  class Test
+    def call(host)
+      5.times.each do |i|
+        puts "##{i} iteration:\n"
+  
+        max_frame_rates = [14880, 8445, 4528, 2349, 1586, 1197, 961,  812]
+        frame_sizes     = [64,    128,  256,  512,  768,  1024, 1280, 1518]
+        input           = max_frame_rates.zip(frame_sizes)
+  
+        throughput = ->(max_frame_rate, frame_size) {
+          Throughput::UdpClient.new(host, 9999).(max_frame_rate, frame_size)
+        }
 
-max_frame_rate = 1000
-frame_sizes = [64, 128, 256, 512, 1024, 1280, 1518]
-
-throughput = ->(frame_size) {
-  Throughput::UdpClient.new(host, 9999, max_frame_rate).(frame_size)
-}
-
-frame_sizes.each do |frame_size|
-  result = throughput.(frame_size)
-  puts "Frame size: #{frame_size} FPS: #{result[:fps]}\n"
+        input.each do |max_frame_rate, frame_size|
+          result = throughput.(max_frame_rate, frame_size)
+          puts "Frame size: #{frame_size} FPS: #{result[:fps]}\n"
+        end
+      end
+    end
+  end
 end

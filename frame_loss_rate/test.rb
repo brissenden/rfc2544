@@ -31,20 +31,27 @@
 
 require_relative 'udp_client'
 
-host = 'kozel.hung.p2.tiktalik.io'
-# host = 'localhost'
+module FrameLossRate
+  class Test
+    def call(host)
+      5.times.each do |i|
+        puts "##{i} iteration:\n"
+        max_frame_rates = [14880, 8445, 4528, 2349, 1586, 1197, 961,  812]
+        frame_sizes     = [64,    128,  256,  512,  768,  1024, 1280, 1518]
+        input           = max_frame_rates.zip(frame_sizes)
 
-max_frame_rate  = 10
-frame_sizes     = [64, 128, 256, 512, 1024, 1280, 1518]
+        frame_loss_rate = ->(max_frame_rate, frame_size) {
+          FrameLossRate::UdpClient.new(host, 9999).(max_frame_rate, frame_size)
+        }
 
-frame_loss_rate = ->(frame_size) {
-  FrameLossRate::UdpClient.new(host, 9999, max_frame_rate).(frame_size)
-}
-
-frame_sizes.each do |frame_size|
-  result = frame_loss_rate.(frame_size)
-  puts "Frame size: #{frame_size}\n"
-  result.each do |row|
-    puts "FPS: #{row[:fps]} Frame loss rate: #{row[:frame_loss_rate]}\n"
+        input.each do |max_frame_rate, frame_size|
+          result = frame_loss_rate.(max_frame_rate, frame_size)
+          puts "Frame size: #{frame_size}\n"
+          result.each do |row|
+            puts "FPS: #{row[:fps]} Frame loss rate: #{row[:frame_loss_rate]}\n"
+          end
+        end
+      end
+    end
   end
 end
