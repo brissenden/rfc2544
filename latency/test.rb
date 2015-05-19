@@ -23,7 +23,7 @@ require_relative 'udp_client'
 module Latency
   class Test
     def call(host)
-      20.times.each do |i|
+      5.times.each do |i|
         puts "##{i} iteration:\n"
   
         test_time       = 120
