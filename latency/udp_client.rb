@@ -43,7 +43,7 @@ module Latency
       
       @test_time.to_i.times.each do |sec|
         if sec == (@test_time.to_i/2)-1
-          @timestamp = Time.now.to_i
+          @timestamp = Time.now.to_f
           send_request build_request('CMD_LATENCY', @timestamp.to_s)
         end
         
