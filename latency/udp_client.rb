@@ -30,8 +30,7 @@ module Latency
         send_data_packets
         
         send_and_wait_to_ack build_request('CMD_LATENCY_SYN') do |response|
-          puts "Response: #{response.data} -> #{response.data.to_f}"
-          @latency = @timestamp - response.data.to_f
+          @latency = (response.data.to_f - @timestamp) * 1000
         end
       end
       @latency
