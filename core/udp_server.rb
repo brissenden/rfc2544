@@ -47,7 +47,7 @@ module Core
     end
   
     def latency_handler
-      @timestamp = Time.now.to_i
+      @timestamp = Time.now.to_f
     end
   
     def latency_syn_handler(source)
