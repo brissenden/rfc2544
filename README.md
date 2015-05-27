@@ -3,6 +3,13 @@ RFC2544
 
 RFC2544 network benchmark written in Ruby.
 
-##Execute:
+## Usage example:
+
+### Run server on Machine #1:
 `ruby core/udp_server.rb`
-`ruby run.rb HOST='localhost'`
+
+### Run test script on Machine #2
+`ruby run.rb HOST='machine1_ip'`
+
+## Dependencies:
+`gem install bindata`
