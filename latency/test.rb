@@ -25,19 +25,19 @@ module Latency
     def call(host)
       5.times.each do |i|
         puts "##{i} iteration:\n"
-  
-        test_time       = 120
+
+        test_time       = 10
         max_frame_rates = [14880, 8445, 4528, 2349, 1586, 1197, 961,  812]
         frame_sizes     = [64,    128,  256,  512,  768,  1024, 1280, 1518]
         input           = max_frame_rates.zip(frame_sizes)
-  
+
         latency = ->(frame_rate, frame_size) {
           Latency::UdpClient.new(host, 9999, test_time).(frame_rate, frame_size)
         }
 
         input.each do |max_frame_rate, frame_size|
           result = latency.(max_frame_rate, frame_size)
-          puts "Frame size: #{frame_size} Latency: #{result}\n"
+          puts "Frame size: #{frame_size} Latency: #{result} ms\n"
         end
       end
     end
