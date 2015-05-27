@@ -11,5 +11,10 @@ RFC2544 network benchmark written in Ruby.
 ### Run test script on Machine #2
 `ruby run.rb HOST='machine1_ip'`
 
+### Tests:
+* Throughput
+* Frame loss rate
+* Latency (10 sec)
+
 ## Dependencies:
 `gem install bindata`
