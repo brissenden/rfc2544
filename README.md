@@ -17,4 +17,5 @@ RFC2544 network benchmark written in Ruby.
 * Latency (10 sec)
 
 ## Dependencies:
-`gem install bindata`
+* `gem install bindata`
+* `ruby >= 2.0`
