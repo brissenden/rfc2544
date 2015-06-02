@@ -5,6 +5,9 @@ RFC2544 network benchmark written in Ruby.
 
 ## Usage example:
 
+### Make sure that your clocks are synced:
+`service ntp stop ; ntpdate -s time.nist.gov ; service ntp start ; date`
+
 ### Run server on Machine #1:
 `ruby core/udp_server.rb`
 
@@ -17,5 +20,5 @@ RFC2544 network benchmark written in Ruby.
 * Latency (10 sec)
 
 ## Dependencies:
-* `gem install bindata`
-* `ruby >= 2.0`
+* `gem bindata`
+* `ruby`
